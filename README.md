@@ -53,7 +53,7 @@ npx serve -l 3000
 
 ```bash
 cd backend
-
+python -m pytest tests/ -v
 ```
 
 Covers the safety-critical deterministic logic: box-size rounding (regular vs outsize vs exceeds-catalog), ledger guardrails (negative-stock prevention, large-deduction sanity check), and invoice idempotency.
