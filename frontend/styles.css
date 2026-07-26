@@ -1,0 +1,226 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+  --kraft-50: #FAF7F1;
+  --kraft-100: #F1EBDD;
+  --teal-900: #123D3B;
+  --teal-700: #1F5C56;
+  --teal-500: #2D7A70;
+  --amber-600: #C2620A;
+  --amber-100: #FCEBD5;
+  --red-600: #B3261E;
+  --red-100: #FBE7E5;
+  --ink-900: #1C1917;
+  --ink-600: #57534E;
+  --line: #E4DCCB;
+  --white: #FFFFFF;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--kraft-50);
+  color: var(--ink-900);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 76px; /* space for bottom nav */
+}
+
+h1, h2, h3, .brand-word {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ---------- Top app bar with corrugated-flute signature divider ---------- */
+.appbar {
+  background: var(--teal-900);
+  color: var(--white);
+  padding: 18px 20px 26px;
+  position: relative;
+}
+
+.appbar .brand-word {
+  font-size: 26px;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.appbar .brand-word .dot-ai { color: var(--amber-600); }
+
+.appbar .tagline {
+  font-size: 12.5px;
+  color: #B9D3CE;
+  margin-top: 2px;
+}
+
+.flute-divider {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  display: block;
+}
+
+/* ---------- Layout ---------- */
+.screen { padding: 18px 16px 8px; max-width: 480px; margin: 0 auto; }
+.hidden { display: none !important; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.stock-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.stock-card.low {
+  background: var(--red-100);
+  border-color: #EFC3C0;
+}
+
+.stock-card .size { font-size: 12px; color: var(--ink-600); margin: 0 0 4px; }
+.stock-card .brand { font-size: 11px; color: var(--ink-600); margin: 0 0 6px; }
+.stock-card .qty { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 20px; margin: 0; }
+.stock-card.low .qty { color: var(--red-600); }
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--amber-100);
+  border: 1px solid #EAC28D;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #7A4409;
+  margin-bottom: 14px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary { background: var(--teal-700); color: var(--white); }
+.btn-secondary { background: var(--white); color: var(--teal-900); border: 1.5px solid var(--teal-700); }
+.btn-amber { background: var(--amber-600); color: var(--white); }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+.btn:active { transform: scale(0.98); }
+
+/* ---------- Forms ---------- */
+label { display: block; font-size: 12.5px; color: var(--ink-600); margin: 12px 0 4px; }
+input[type="file"], input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  background: var(--white);
+}
+
+/* ---------- Review queue ---------- */
+.queue-item {
+  border-left: 4px solid var(--amber-600);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.queue-item.substitution { border-left-color: var(--red-600); }
+.queue-item .reason { font-size: 12.5px; color: var(--ink-600); margin: 4px 0 8px; }
+.tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--amber-100);
+  color: #7A4409;
+}
+
+/* ---------- Section headers ---------- */
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 18px 0 8px;
+}
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--white);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.nav-item {
+  border: none;
+  background: none;
+  padding: 10px 4px 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-600);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.nav-item.active { color: var(--teal-700); }
+.nav-item .nav-icon { font-size: 18px; }
+
+/* Focus visibility for keyboard users */
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}

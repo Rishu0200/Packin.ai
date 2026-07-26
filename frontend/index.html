@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>PackIn.ai — Carton Inventory</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#123D3B" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="appbar">
+    <p class="brand-word">Pack<span class="dot-ai">In.ai</span></p>
+    <p class="tagline">Carton box inventory, tracked automatically</p>
+    <svg class="flute-divider" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 14 Q 12.5 0 25 14 T 50 14 T 75 14 T 100 14 T 125 14 T 150 14 T 175 14 T 200 14 T 225 14 T 250 14 T 275 14 T 300 14 T 325 14 T 350 14 T 375 14 T 400 14 V14 H0 Z"
+            fill="#FAF7F1" />
+    </svg>
+  </header>
+
+  <main class="screen">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="screen-dashboard">
+      <div id="alert-banner-slot"></div>
+      <div class="section-title">Stock by size &amp; brand</div>
+      <div id="stock-grid" class="stock-grid">
+        <p class="mono" style="color:var(--ink-600); font-size:13px;">Loading stock…</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showScreen('upload-invoice')">📄 Upload invoice</button>
+        <button class="btn btn-secondary" onclick="showScreen('upload-po')">📷 Upload PO</button>
+      </div>
+
+      <div class="section-title">Export current inventory</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="downloadExport('xlsx')">⬇ Excel</button>
+        <button class="btn btn-secondary" onclick="downloadExport('pdf')">⬇ PDF</button>
+      </div>
+
+      <div class="section-title">Recent activity</div>
+      <div id="activity-feed" class="card">
+        <p class="tagline" style="color:var(--ink-600)">Loading…</p>
+      </div>
+    </section>
+
+    <!-- ============ UPLOAD INVOICE ============ -->
+    <section id="screen-upload-invoice" class="hidden">
+      <h2>Upload invoice</h2>
+      <p class="tagline" style="color:var(--ink-600)">Busy export (PDF) or a photo of a printed invoice.</p>
+      <label for="invoice-file">Invoice file</label>
+      <input type="file" id="invoice-file" accept=".pdf,image/*" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="uploadInvoice()">Process invoice</button>
+        <button class="btn btn-secondary" onclick="showScreen('dashboard')">Cancel</button>
+      </div>
+      <div id="invoice-result"></div>
+    </section>
+
+    <!-- ============ UPLOAD PO ============ -->
+    <section id="screen-upload-po" class="hidden">
+      <h2>Upload purchase order</h2>
+      <p class="tagline" style="color:var(--ink-600)">Structured Excel template (preferred) or a photo of a handwritten slip.</p>
+      <label for="po-file">PO file</label>
+      <input type="file" id="po-file" accept=".xlsx,image/*" capture="environment" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="uploadPO()">Process PO</button>
+        <button class="btn btn-secondary" onclick="showScreen('dashboard')">Cancel</button>
+      </div>
+      <div id="po-result"></div>
+    </section>
+
+    <!-- ============ REVIEW QUEUE ============ -->
+    <section id="screen-review" class="hidden">
+      <h2>Review queue</h2>
+      <div id="review-list">
+        <p class="tagline" style="color:var(--ink-600)">Loading…</p>
+      </div>
+    </section>
+
+    <!-- ============ BRANDS ============ -->
+    <section id="screen-brands" class="hidden">
+      <h2>Brands</h2>
+      <div id="brands-list" class="card" style="margin-bottom:16px;"></div>
+
+      <div class="section-title">Add a brand</div>
+      <label for="new-brand-name">Brand name</label>
+      <input type="text" id="new-brand-name" placeholder="e.g. Sunrise Kitchens" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addBrand()">Add brand</button>
+      </div>
+
+      <div class="section-title">Map a customer to a brand</div>
+      <label for="map-customer-name">Customer name</label>
+      <input type="text" id="map-customer-name" placeholder="e.g. Shree Ganesh Plywood" />
+      <label for="map-brand-select">Brand</label>
+      <select id="map-brand-select"></select>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="mapCustomer()">Save mapping</button>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-screen="dashboard" onclick="showScreen('dashboard')">
+      <span class="nav-icon">📦</span> Dashboard
+    </button>
+    <button class="nav-item" data-screen="upload-invoice" onclick="showScreen('upload-invoice')">
+      <span class="nav-icon">📄</span> Invoice
+    </button>
+    <button class="nav-item" data-screen="review" onclick="showScreen('review')">
+      <span class="nav-icon">🔍</span> Review
+    </button>
+    <button class="nav-item" data-screen="brands" onclick="showScreen('brands')">
+      <span class="nav-icon">🏷️</span> Brands
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
