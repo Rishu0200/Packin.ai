@@ -14,7 +14,7 @@ def db_session():
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    for axis, values in {"dim1": [15, 17, 19, 21], "dim2": [20], "dim3": [4, 6, 8]}.items():
+    for axis, values in {"dim1": [15, 17, 19, 21], "dim2": [16,18,20], "dim3": [4, 6, 8]}.items():
         for v in values:
             session.add(CatalogDimension(axis=axis, value=v, active=True))
     session.commit()

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import init_db
 from app.db.seed import seed
-from app.routers import invoices, purchase_orders, inventory, review_queue, brands, combinations, activity
+from app.routers import invoices, purchase_orders, inventory, review_queue, brands, combinations, activity, notify
 
 app = FastAPI(
     title="PackIn.ai",
@@ -33,7 +33,7 @@ app.include_router(review_queue.router)
 app.include_router(brands.router)
 app.include_router(combinations.router)
 app.include_router(activity.router)
-
+app.include_router(notify.router)
 
 @app.get("/")
 def root():
