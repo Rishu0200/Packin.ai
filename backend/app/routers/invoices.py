@@ -7,6 +7,7 @@ from app.core.resolver import resolve_box
 from app.core.brand_resolver import resolve_brand
 from app.core.substitution import deduct_with_substitution_check
 from app.core.ledger import get_or_create_box_type, is_already_processed
+from app.core.notifications import notify_low_stock_if_any
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
@@ -84,4 +85,5 @@ async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get
         db.commit()
         results.append({"line_item_id": li.id, **deduction})
 
+    notify_low_stock_if_any(db, trigger=f"invoice {invoice_no} upload")
     return {"invoice_no": invoice_no, "line_item_results": results}
