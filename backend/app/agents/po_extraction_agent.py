@@ -1,6 +1,6 @@
 """
 PO extraction agent — reads a scanned handwritten PO slip and proposes box
-sizes + quantities, with the same Claude -> Gemini -> Groq -> Hugging Face
+sizes + quantities, with the same Gemini -> Groq -> Hugging Face
 fallback chain as invoice extraction.
 
 Handwriting is the hardest input this system sees, so having several
