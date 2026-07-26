@@ -10,7 +10,6 @@ the rest of the pipeline.
 """
 import base64
 from app.config import (
-    ANTHROPIC_API_KEY, ANTHROPIC_MODEL,
     GEMINI_API_KEY, GEMINI_MODEL,
     GROQ_API_KEY, GROQ_VISION_MODEL,
     HF_API_TOKEN, HF_VISION_MODEL,
@@ -23,30 +22,6 @@ class ProviderError(Exception):
         self.provider = provider
         self.original = original
         super().__init__(f"{provider} failed: {original}")
-
-
-def call_claude(system_prompt: str, user_text: str, file_bytes: bytes, media_type: str) -> str:
-    from anthropic import Anthropic
-    try:
-        client = Anthropic(api_key=ANTHROPIC_API_KEY)
-        encoded = base64.standard_b64encode(file_bytes).decode("utf-8")
-        block_type = "document" if media_type == "application/pdf" else "image"
-        response = client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=2000,
-            system=system_prompt,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": block_type, "source": {"type": "base64", "media_type": media_type,
-                                                      "data": encoded}},
-                    {"type": "text", "text": user_text},
-                ],
-            }],
-        )
-        return "".join(b.text for b in response.content if b.type == "text")
-    except Exception as e:
-        raise ProviderError("anthropic", e)
 
 
 def call_gemini(system_prompt: str, user_text: str, file_bytes: bytes, media_type: str) -> str:
@@ -116,7 +91,6 @@ def call_huggingface(system_prompt: str, user_text: str, file_bytes: bytes, medi
 
 
 PROVIDER_FUNCTIONS = {
-    "anthropic": call_claude,
     "gemini": call_gemini,
     "groq": call_groq,
     "huggingface": call_huggingface,

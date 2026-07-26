@@ -5,7 +5,7 @@ from app.db.models import CatalogDimension, Brand, CustomerBrandMap
 
 CATALOG = {
     "dim1": [15, 17, 19, 21],
-    "dim2": [16, 18, 20],
+    "dim2": [20],
     "dim3": [4, 6, 8],
 }
 
