@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./packin.db")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 
 # Backup providers, tried in this order if Claude fails/times out.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
@@ -18,7 +16,7 @@ HF_API_TOKEN = os.getenv("HF_API_TOKEN", "")
 HF_VISION_MODEL = os.getenv("HF_VISION_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
 
 EXTRACTION_PROVIDER_ORDER = os.getenv(
-    "EXTRACTION_PROVIDER_ORDER", "anthropic,gemini,groq,huggingface"
+    "EXTRACTION_PROVIDER_ORDER", "gemini,groq,huggingface"
 ).split(",")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
