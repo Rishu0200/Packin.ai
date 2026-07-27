@@ -31,6 +31,14 @@ services:
         value: Qwen/Qwen2.5-VL-7B-Instruct
       - key: EXTRACTION_PROVIDER_ORDER
         value: gemini,groq,huggingface
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_EXPIRE_MINUTES
+        value: "480"
+      - key: BOOTSTRAP_ADMIN_USERNAME
+        value: admin
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_CHAT_ID
