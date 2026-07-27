@@ -21,8 +21,25 @@
 
   <main class="screen">
 
+    <!-- ============ LOGIN ============ -->
+    <section id="screen-login">
+      <h2>Log in</h2>
+      <p class="tagline" style="color:var(--ink-600)">Ask your admin for an account if you don't have one yet.</p>
+      <label for="login-username">Username</label>
+      <input type="text" id="login-username" autocomplete="username" />
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" autocomplete="current-password" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="login()" style="grid-column: span 2;">Log in</button>
+      </div>
+      <div id="login-error"></div>
+    </section>
+
     <!-- ============ DASHBOARD ============ -->
-    <section id="screen-dashboard">
+    <section id="screen-dashboard" class="hidden">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="logout()">Log out</button>
+      </div>
       <div id="alert-banner-slot"></div>
       <div class="section-title">Stock by size &amp; brand</div>
       <div id="stock-grid" class="stock-grid">
@@ -104,7 +121,7 @@
 
   </main>
 
-  <nav class="bottom-nav">
+  <nav class="bottom-nav hidden" id="bottom-nav">
     <button class="nav-item active" data-screen="dashboard" onclick="showScreen('dashboard')">
       <span class="nav-icon">📦</span> Dashboard
     </button>
@@ -119,6 +136,7 @@
     </button>
   </nav>
 
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

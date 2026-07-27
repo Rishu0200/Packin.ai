@@ -2,6 +2,71 @@
 // Change this to your deployed backend URL in production.
 const API_BASE = window.PACKIN_API_BASE || "http://localhost:8000";
 
+// ---------------- Auth ----------------
+function getToken() {
+  return localStorage.getItem("packin_token");
+}
+
+function setToken(token) {
+  localStorage.setItem("packin_token", token);
+}
+
+function clearToken() {
+  localStorage.removeItem("packin_token");
+}
+
+// Every authenticated call should go through this instead of raw fetch() —
+// it attaches the token and bounces back to login on a 401 automatically.
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  const headers = { ...(options.headers || {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  const res = await fetch(url, { ...options, headers });
+  if (res.status === 401) {
+    clearToken();
+    showScreen("login");
+    throw new Error("Session expired — please log in again.");
+  }
+  return res;
+}
+
+async function login() {
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value;
+  const errorBox = document.getElementById("login-error");
+  errorBox.innerHTML = "";
+
+  if (!username || !password) {
+    errorBox.innerHTML = `<p class="tagline" style="color:var(--red-600)">Enter both fields.</p>`;
+    return;
+  }
+
+  try {
+    const body = new URLSearchParams({ username, password });
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      errorBox.innerHTML = `<p class="tagline" style="color:var(--red-600)">${data.detail || "Login failed"}</p>`;
+      return;
+    }
+    const data = await res.json();
+    setToken(data.access_token);
+    document.getElementById("bottom-nav").classList.remove("hidden");
+    showScreen("dashboard");
+  } catch (err) {
+    errorBox.innerHTML = `<p class="tagline" style="color:var(--red-600)">Could not reach the server.</p>`;
+  }
+}
+
+function logout() {
+  clearToken();
+  document.getElementById("bottom-nav").classList.add("hidden");
+  showScreen("login");
+}
+
 // ---------------- Navigation ----------------
 function showScreen(name) {
   document.querySelectorAll("main > section").forEach((s) => s.classList.add("hidden"));
@@ -20,9 +85,9 @@ function showScreen(name) {
 async function loadDashboard() {
   try {
     const [stockRes, lowStockRes, activityRes] = await Promise.all([
-      fetch(`${API_BASE}/inventory`).then((r) => r.json()),
-      fetch(`${API_BASE}/inventory/low-stock`).then((r) => r.json()),
-      fetch(`${API_BASE}/activity?limit=10`).then((r) => r.json()),
+      authFetch(`${API_BASE}/inventory`).then((r) => r.json()),
+      authFetch(`${API_BASE}/inventory/low-stock`).then((r) => r.json()),
+      authFetch(`${API_BASE}/activity?limit=10`).then((r) => r.json()),
     ]);
 
     const grid = document.getElementById("stock-grid");
@@ -59,8 +124,21 @@ async function loadDashboard() {
   }
 }
 
-function downloadExport(format) {
-  window.open(`${API_BASE}/inventory/export?format=${format}`, "_blank");
+async function downloadExport(format) {
+  try {
+    const res = await authFetch(`${API_BASE}/inventory/export?format=${format}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `packin_inventory_report.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Export download failed", err);
+  }
 }
 
 // ---------------- Invoice upload ----------------
@@ -77,7 +155,7 @@ async function uploadInvoice() {
   formData.append("file", fileInput.files[0]);
 
   try {
-    const res = await fetch(`${API_BASE}/invoices/upload`, { method: "POST", body: formData });
+    const res = await authFetch(`${API_BASE}/invoices/upload`, { method: "POST", body: formData });
     const data = await res.json();
     resultBox.innerHTML = `<div class="card"><pre class="mono" style="white-space:pre-wrap;font-size:12px;">${JSON.stringify(data, null, 2)}</pre></div>`;
   } catch (err) {
@@ -103,7 +181,7 @@ async function uploadPO() {
   formData.append("file", file);
 
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, { method: "POST", body: formData });
+    const res = await authFetch(`${API_BASE}${endpoint}`, { method: "POST", body: formData });
     const data = await res.json();
     resultBox.innerHTML = `<div class="card"><pre class="mono" style="white-space:pre-wrap;font-size:12px;">${JSON.stringify(data, null, 2)}</pre></div>`;
     if (!isExcel) {
@@ -118,7 +196,7 @@ async function uploadPO() {
 async function loadReviewQueue() {
   const list = document.getElementById("review-list");
   try {
-    const data = await fetch(`${API_BASE}/review`).then((r) => r.json());
+    const data = await authFetch(`${API_BASE}/review`).then((r) => r.json());
     if (!data.queue.length) {
       list.innerHTML = `<p class="tagline" style="color:var(--ink-600)">Nothing flagged right now.</p>`;
       return;
@@ -140,7 +218,7 @@ async function loadBrands() {
   const listEl = document.getElementById("brands-list");
   const selectEl = document.getElementById("map-brand-select");
   try {
-    const data = await fetch(`${API_BASE}/brands`).then((r) => r.json());
+    const data = await authFetch(`${API_BASE}/brands`).then((r) => r.json());
     listEl.innerHTML = data.brands.map((b) => `<p style="margin:6px 0;">🏷️ ${b.name}</p>`).join("");
     selectEl.innerHTML = data.brands.map((b) => `<option value="${b.id}">${b.name}</option>`).join("");
   } catch (err) {
@@ -151,7 +229,7 @@ async function loadBrands() {
 async function addBrand() {
   const name = document.getElementById("new-brand-name").value.trim();
   if (!name) return;
-  await fetch(`${API_BASE}/brands`, {
+  await authFetch(`${API_BASE}/brands`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -164,7 +242,7 @@ async function mapCustomer() {
   const customer_name = document.getElementById("map-customer-name").value.trim();
   const brand_id = parseInt(document.getElementById("map-brand-select").value, 10);
   if (!customer_name || !brand_id) return;
-  await fetch(`${API_BASE}/brands/map-customer`, {
+  await authFetch(`${API_BASE}/brands/map-customer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ customer_name, brand_id }),
@@ -179,4 +257,19 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-showScreen("dashboard");
+(async function init() {
+  if (getToken()) {
+    try {
+      const res = await authFetch(`${API_BASE}/auth/me`);
+      if (res.ok) {
+        document.getElementById("bottom-nav").classList.remove("hidden");
+        showScreen("dashboard");
+        return;
+      }
+    } catch (err) {
+      // authFetch already redirects to login on a 401
+      return;
+    }
+  }
+  showScreen("login");
+})();

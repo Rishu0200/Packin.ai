@@ -3,16 +3,18 @@ import pandas as pd
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.db.models import PurchaseOrder, Brand
+from app.db.models import PurchaseOrder, Brand, User
 from app.core.ledger import get_or_create_box_type, add_to_ledger, is_already_processed
 from app.core.resolver import get_catalog_values
 from app.agents.po_extraction_agent import extract_po_slip, validate_po_item
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/po", tags=["purchase_orders"])
 
 
 @router.post("/upload-excel")
-async def upload_po_excel(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_po_excel(file: UploadFile = File(...), db: Session = Depends(get_db),
+                           current_user: User = Depends(get_current_user)):
     """Primary PO ingestion path — the structured PO_Upload_Template.xlsx
     filled in by supply chain ops. No LLM needed since the data is already
     structured; each row is validated against the catalog directly."""
@@ -46,7 +48,8 @@ async def upload_po_excel(file: UploadFile = File(...), db: Session = Depends(ge
             continue
 
         box, _created = get_or_create_box_type(db, int(dim1), int(dim2), int(dim3), brand.id)
-        result = add_to_ledger(db, box.id, float(qty), reference_type="po", reference_id=po_ref)
+        result = add_to_ledger(db, box.id, float(qty), reference_type="po", reference_id=po_ref,
+                                created_by=current_user.username)
 
         po = PurchaseOrder(po_reference=po_ref, date=str(row.get("PO Date")),
                             box_id=box.id, qty_added=int(qty),
@@ -61,7 +64,8 @@ async def upload_po_excel(file: UploadFile = File(...), db: Session = Depends(ge
 
 
 @router.post("/upload-slip")
-async def upload_po_slip(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_po_slip(file: UploadFile = File(...), db: Session = Depends(get_db),
+                          current_user: User = Depends(get_current_user)):
     """Fallback path for handwritten slips. Extracts and validates but does
     NOT write to the ledger — handwriting risk means every slip requires
     explicit human confirmation via /po/confirm."""
@@ -88,7 +92,8 @@ async def upload_po_slip(file: UploadFile = File(...), db: Session = Depends(get
 
 
 @router.post("/confirm")
-async def confirm_po_slip(po_reference: str, items: list[dict], db: Session = Depends(get_db)):
+async def confirm_po_slip(po_reference: str, items: list[dict], db: Session = Depends(get_db),
+                           current_user: User = Depends(get_current_user)):
     """Applies a human-confirmed set of PO slip items to the ledger."""
     if is_already_processed(db, "po", po_reference):
         return {"status": "skipped_duplicate", "po_reference": po_reference}
@@ -102,7 +107,7 @@ async def confirm_po_slip(po_reference: str, items: list[dict], db: Session = De
         box, _created = get_or_create_box_type(db, item["dim1"], item["dim2"], item["dim3"],
                                                  brand.id)
         result = add_to_ledger(db, box.id, item["qty"], reference_type="po",
-                                reference_id=po_reference)
+                                reference_id=po_reference, created_by=current_user.username)
         po = PurchaseOrder(po_reference=po_reference, box_id=box.id, qty_added=item["qty"],
                             source="scanned_slip", status="applied")
         db.add(po)
