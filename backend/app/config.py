@@ -18,6 +18,17 @@ HF_VISION_MODEL = os.getenv("HF_VISION_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
 EXTRACTION_PROVIDER_ORDER = os.getenv(
     "EXTRACTION_PROVIDER_ORDER", "gemini,groq,huggingface"
 ).split(",")
+
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "*")
+
+# Auth
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")  
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  
+
+BOOTSTRAP_ADMIN_USERNAME = os.getenv("BOOTSTRAP_ADMIN_USERNAME", "admin")
+BOOTSTRAP_ADMIN_PASSWORD = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
+
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 

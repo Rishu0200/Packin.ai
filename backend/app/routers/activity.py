@@ -41,11 +41,13 @@ def list_activity(limit: int = Query(50, le=200), db: Session = Depends(get_db))
             "brand": brand.name if brand else "unknown",
             "qty_change": e.qty_change,
             "direction": direction,
+            "created_by": e.created_by or "system",
             "notes": e.notes,
             "summary": f"{REFERENCE_LABELS.get(e.reference_type, e.reference_type)} "
                        f"{e.reference_id} {direction} {abs(e.qty_change)} x "
                        f"{box.size_label if box else '?'} "
-                       f"({brand.name if brand else '?'})",
+                       f"({brand.name if brand else '?'})"
+                       f"{' — by ' + e.created_by if e.created_by else ''}",
         })
     return {"activity": feed}
 

@@ -14,6 +14,15 @@ from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, unique=True)
+    hashed_password = Column(String, nullable=False)
+    role = Column(String, default="staff")  # "admin" | "staff"
+    active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 class CatalogDimension(Base):
     """Editable master list of valid box dimensions per axis.
@@ -153,6 +162,7 @@ class BoxLedger(Base):
     qty_change = Column(Integer, nullable=False)  # negative = deduction, positive = addition
     reference_type = Column(String, nullable=False)  # invoice | po | combination | correction
     reference_id = Column(String, nullable=False)
+    created_by = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 

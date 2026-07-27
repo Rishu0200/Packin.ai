@@ -2,6 +2,8 @@
 Safe to re-run — skips anything that already exists."""
 from app.db.session import SessionLocal, init_db
 from app.db.models import CatalogDimension, Brand, CustomerBrandMap
+from app.core.security import hash_password
+from backend.app.config import BOOTSTRAP_ADMIN_PASSWORD, BOOTSTRAP_ADMIN_USERNAME
 
 CATALOG = {
     "dim1": [15, 17, 19, 21],
@@ -40,6 +42,22 @@ def seed():
             exists = db.query(CustomerBrandMap).filter_by(customer_name=customer).first()
             if not exists:
                 db.add(CustomerBrandMap(customer_name=customer, brand_id=brand_objs[brand_name].id))
+
+        if db.query(User).count() == 0:
+            if not BOOTSTRAP_ADMIN_PASSWORD:
+                print(
+                    "WARNING: No users exist and BOOTSTRAP_ADMIN_PASSWORD is not set — "
+                    "skipping admin creation. Set it in .env and restart, or create a "
+                    "user directly via the database."
+                )
+            else:
+                db.add(User(
+                    username=BOOTSTRAP_ADMIN_USERNAME,
+                    hashed_password=hash_password(BOOTSTRAP_ADMIN_PASSWORD),
+                    role="admin", active=True,
+                ))
+                print(f"Bootstrapped admin user '{BOOTSTRAP_ADMIN_USERNAME}'. "
+                      f"Change this password after first login.")        
 
         db.commit()
         print("Seed complete.")

@@ -8,12 +8,15 @@ from app.core.brand_resolver import resolve_brand
 from app.core.substitution import deduct_with_substitution_check
 from app.core.ledger import get_or_create_box_type, is_already_processed
 from app.core.notifications import notify_low_stock_if_any
+from app.core.security import get_current_user
+from app.db.models import User
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
 
 @router.post("/upload")
-async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get_db),
+                         current_user: User = Depends(get_current_user)):
     file_bytes = await file.read()
     media_type = file.content_type or "application/pdf"
 
@@ -77,7 +80,8 @@ async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get
         deduction = deduct_with_substitution_check(
             db, box.id, resolved["dim1"], resolved["dim2"], resolved["dim3"],
             brand_result["brand_id"], item["qty"],
-            reference_type="invoice", reference_id=invoice_no,
+            reference_type="invoice", reference_id=invoice_no, 
+            created_by=current_user.username
         )
 
         li.status = deduction["status"]

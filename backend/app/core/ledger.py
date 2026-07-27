@@ -50,10 +50,11 @@ def is_already_processed(db: Session, reference_type: str, reference_id: str) ->
 
 
 def write_ledger_entry(db: Session, box_id: int, qty_change: int,
-                        reference_type: str, reference_id: str, notes: str = None) -> BoxLedger:
+                        reference_type: str, reference_id: str, notes: str = None, created_by: str = None) -> BoxLedger:
     entry = BoxLedger(
         box_id=box_id, qty_change=qty_change,
         reference_type=reference_type, reference_id=reference_id, notes=notes,
+        created_by=created_by,
     )
     db.add(entry)
     db.commit()
@@ -68,7 +69,7 @@ def write_ledger_entry(db: Session, box_id: int, qty_change: int,
 
 
 def deduct_from_ledger(db: Session, box_id: int, qty: float,
-                        reference_type: str, reference_id: str, notes: str = None) -> dict:
+                        reference_type: str, reference_id: str, notes: str = None, created_by: str = None) -> dict:
     """The core guardrail: never let a deduction push stock negative, and
     flag unusually large deductions relative to current stock (catches
     extraction errors like qty=500 instead of qty=5)."""
@@ -91,14 +92,14 @@ def deduct_from_ledger(db: Session, box_id: int, qty: float,
             "box_id": box_id,
         }
 
-    write_ledger_entry(db, box_id, -qty, reference_type, reference_id, notes)
+    write_ledger_entry(db, box_id, -qty, reference_type, reference_id, notes, created_by)
     return {"status": "deducted", "box_id": box_id, "qty": qty, "remaining": current - qty}
 
 
 def add_to_ledger(db: Session, box_id: int, qty: float,
-                   reference_type: str, reference_id: str, notes: str = None) -> dict:
+                   reference_type: str, reference_id: str, notes: str = None, created_by: str = None) -> dict:
     qty = int(round(qty))
-    write_ledger_entry(db, box_id, qty, reference_type, reference_id, notes)
+    write_ledger_entry(db, box_id, qty, reference_type, reference_id, notes, created_by)
     new_total = get_current_stock(db, box_id)
     return {"status": "added", "box_id": box_id, "qty": qty, "new_total": new_total}
 
