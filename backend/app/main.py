@@ -1,8 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import init_db
 from app.db.seed import seed
-from app.routers import invoices, purchase_orders, inventory, review_queue, brands, combinations, activity, notify
+from app.config import FRONTEND_ORIGIN
+from app.core.security import get_current_user
+from app.routers import (
+    invoices, purchase_orders, inventory, review_queue, brands,
+    combinations, activity, notify, auth,
+)
 
 app = FastAPI(
     title="PackIn.ai",
@@ -14,7 +19,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten to your frontend's actual origin in production
+    allow_origins=[FRONTEND_ORIGIN] if FRONTEND_ORIGIN != "*" else ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -26,14 +31,21 @@ def on_startup():
     seed()
 
 
-app.include_router(invoices.router)
-app.include_router(purchase_orders.router)
-app.include_router(inventory.router)
-app.include_router(review_queue.router)
-app.include_router(brands.router)
-app.include_router(combinations.router)
-app.include_router(activity.router)
-app.include_router(notify.router)
+# /auth/login and /auth/me are intentionally NOT behind get_current_user —
+# you need to be able to log in before you have a token. Every other
+# router requires a valid token, protecting all data-changing endpoints.
+app.include_router(auth.router)
+
+protected = [Depends(get_current_user)]
+app.include_router(invoices.router, dependencies=protected)
+app.include_router(purchase_orders.router, dependencies=protected)
+app.include_router(inventory.router, dependencies=protected)
+app.include_router(review_queue.router, dependencies=protected)
+app.include_router(brands.router, dependencies=protected)
+app.include_router(combinations.router, dependencies=protected)
+app.include_router(activity.router, dependencies=protected)
+app.include_router(notify.router, dependencies=protected)
+
 
 @app.get("/")
 def root():
