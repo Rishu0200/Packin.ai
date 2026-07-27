@@ -1,9 +1,9 @@
 """Seeds the catalog dimensions and brand master data.
 Safe to re-run — skips anything that already exists."""
 from app.db.session import SessionLocal, init_db
-from app.db.models import CatalogDimension, Brand, CustomerBrandMap
+from app.db.models import CatalogDimension, Brand, CustomerBrandMap, User
 from app.core.security import hash_password
-from backend.app.config import BOOTSTRAP_ADMIN_PASSWORD, BOOTSTRAP_ADMIN_USERNAME
+from app.config import BOOTSTRAP_ADMIN_USERNAME, BOOTSTRAP_ADMIN_PASSWORD
 
 CATALOG = {
     "dim1": [15, 17, 19, 21],
